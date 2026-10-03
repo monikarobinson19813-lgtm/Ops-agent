@@ -3,6 +3,8 @@ import { decideEscalation } from './domain/escalation.js';
 import { createCase, transitionCase, CASE_STATES, buildProviderEscalation } from './domain/case.js';
 import { createApproval } from './domain/approval.js';
 import { MockLookupAdapter } from './adapters/mock.js';
+import { composeClientReply } from './domain/reply.js';
+import { classifyRisk, canBeAutoSendCandidate } from './domain/risk.js';
 
 const message = process.argv.slice(2).join(' ') || 'customer not received TX10001';
 const parsed = parseMessage(message);
@@ -21,6 +23,10 @@ const decision = decideEscalation({
     : null,
   now:new Date('2026-10-03T12:15:00.000Z')
 });
+
+const reply = composeClientReply(parsed, record);
+const risk = classifyRisk({ parsed, decision });
+const autoSendCandidate = canBeAutoSendCandidate(risk, reply);
 
 let caseRecord = null;
 let approval = null;
@@ -57,6 +63,9 @@ console.log(JSON.stringify({
   parsed,
   record,
   decision,
+  reply,
+  risk,
+  autoSendCandidate,
   caseRecord,
   approval,
   mode:'DEMO_ONLY'
