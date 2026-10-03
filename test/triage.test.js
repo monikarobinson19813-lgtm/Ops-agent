@@ -60,7 +60,8 @@ const followups=[
 {
   const scored=scoreCase(cnr,{now});
   assert.ok(scored.priorityScore >= 65);
-  assert.equal(scored.nextAction,'TRACE_OR_ESCALATE');
+  assert.equal(scored.nextAction,'CHASE_PROVIDER');
+  assert.ok(scored.reasons.includes('Beneficiary non-receipt'));
 }
 
 {
