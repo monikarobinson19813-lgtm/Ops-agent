@@ -107,8 +107,16 @@ function pendingCase(caseId, reference, {
   });
 
   assert.equal(clientUpdates.length,2);
-  assert.equal(clientUpdates.find(x=>x.clientChannelId==='CLIENT-A').caseIds.length,2);
-  assert.equal(clientUpdates.find(x=>x.clientChannelId==='CLIENT-B').caseIds.length,1);
+  const clientA=clientUpdates.find(x=>x.clientChannelId==='CLIENT-A');
+  const clientB=clientUpdates.find(x=>x.clientChannelId==='CLIENT-B');
+
+  assert.equal(clientA.caseIds.length,2);
+  assert.equal(clientA.affectedCount,2);
+  assert.equal(clientB.caseIds.length,1);
+  assert.equal(clientB.affectedCount,1);
+  assert.match(clientA.message,/2 affected transactions/i);
+  assert.doesNotMatch(clientA.message,/TX3/);
+  assert.doesNotMatch(clientB.message,/TX1|TX2/);
   assert.ok(clientUpdates.every(x=>x.reviewRequired===true));
 }
 
