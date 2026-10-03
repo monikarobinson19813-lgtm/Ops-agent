@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ops Agent Command Center</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#111827;background:#f4f5f7}
+*{box-sizing:border-box}
+body{margin:0}
+header{background:#111827;color:white;padding:18px 22px;position:sticky;top:0;z-index:2}
+.header-row{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+header h1{margin:0 0 4px;font-size:20px}
+header p{margin:0;opacity:.72;font-size:12px}
+nav a{color:white;text-decoration:none;font-size:13px;padding:8px 10px;border:1px solid #374151;border-radius:8px}
+main{max-width:1180px;margin:18px auto;padding:0 14px 30px}
+.health{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.health strong{font-size:20px}
+.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#e5e7eb;font-size:11px;font-weight:700}
+.scorecard{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
+.metric,.panel,.item{background:white;border:1px solid #e5e7eb;border-radius:12px}
+.metric{padding:12px}.metric span{font-size:11px;color:#6b7280}.metric strong{display:block;font-size:24px;margin-top:2px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.panel{padding:14px;margin-bottom:14px}
+.panel h2{font-size:16px;margin:0 0 10px}.sub{font-size:11px;color:#6b7280;margin-top:-5px;margin-bottom:10px}
+.item{padding:12px;margin:8px 0}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.title{font-weight:700}.muted{font-size:11px;color:#6b7280}
+.reasons{font-size:12px;margin-top:8px;color:#374151}
+.action{font-size:11px;font-weight:700;margin-top:7px}
+.band{display:inline-block;padding:3px 7px;border-radius:999px;background:#eef2ff;font-size:10px;font-weight:700}
+.empty{font-size:12px;color:#6b7280;padding:10px 0}
+@media(max-width:850px){.scorecard{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:520px){.scorecard{grid-template-columns:repeat(2,1fr)}.header-row{align-items:flex-start;flex-direction:column}.row{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <div>
+      <h1>Ops Agent — Command Center</h1>
+      <p>Demo data only · shadow mode · no external messages are sent</p>
+    </div>
+    <nav><a href="/review">Review approvals</a></nav>
+  </div>
+</header>
+<main>
+  <div id="health" class="health"></div>
+  <div id="scorecard" class="scorecard"></div>
+  <div class="grid">
+    <div>
+      <section class="panel">
+        <h2>Top priorities</h2>
+        <div class="sub">Ranked across incidents and cases</div>
+        <div id="top-priorities"></div>
+      </section>
+      <section class="panel">
+        <h2>Waiting provider</h2>
+        <div class="sub">Individual cases requiring upstream attention</div>
+        <div id="waiting-provider"></div>
+      </section>
+    </div>
+    <div>
+      <section class="panel">
+        <h2>Active incidents</h2>
+        <div class="sub">Common route/provider/queue issues</div>
+        <div id="active-incidents"></div>
+      </section>
+      <section class="panel">
+        <h2>Client updates ready</h2>
+        <div class="sub">Confirmed updates waiting for review/send</div>
+        <div id="client-updates"></div>
+      </section>
+      <section class="panel">
+        <h2>Pending approvals</h2>
+        <div class="sub">Shadow-mode drafts awaiting a human decision</div>
+        <div id="pending-approvals"></div>
+      </section>
+    </div>
+  </div>
+</main>
+<script src="/command-center.js"></script>
+</body>
+</html>
