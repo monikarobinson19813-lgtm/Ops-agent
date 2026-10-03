@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ops Agent Shadow Review</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f4f5f7;color:#111827}
+header{background:#111827;color:white;padding:18px 22px}
+header h1{margin:0 0 4px;font-size:20px}
+header p{margin:0;opacity:.75;font-size:13px}
+main{max-width:1000px;margin:18px auto;padding:0 14px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.metric,.card{background:white;border:1px solid #e5e7eb;border-radius:10px}
+.metric{padding:12px}.metric strong{display:block;font-size:24px}
+.card{padding:16px;margin-bottom:12px}
+.top{display:flex;justify-content:space-between;gap:12px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2ff;font-size:11px}
+.muted{color:#6b7280;font-size:12px}
+.label{font-size:11px;text-transform:uppercase;color:#6b7280;margin:12px 0 4px}
+textarea{width:100%;min-height:90px;box-sizing:border-box;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-family:inherit}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{border:0;border-radius:8px;padding:9px 12px;cursor:pointer}
+.primary{background:#111827;color:white}.secondary{background:#e5e7eb}.warn{background:#fef3c7}.danger{background:#fee2e2}
+.status{margin-top:8px;font-size:12px}
+@media(max-width:650px){.summary{grid-template-columns:1fr}.top{flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+<h1>Ops Agent — Shadow Review</h1>
+<p>No external message is sent. Decisions are stored only in local demo state.</p>
+</header>
+<main>
+<div id="summary" class="summary"></div>
+<div id="queue"></div>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

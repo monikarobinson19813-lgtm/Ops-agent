@@ -1,0 +1,26 @@
+[
+  {
+    "approvalId":"APR-DEMO-001",
+    "caseId":"OPS-DEMO-001",
+    "kind":"CLIENT_REPLY",
+    "reference":"TX10001",
+    "sourceChannel":"CLIENT-DEMO",
+    "targetChannel":"CLIENT-DEMO",
+    "context":"status TX10001",
+    "facts":"85,000 | SUCCESS | TRACE-DEMO-10001",
+    "proposedText":"Checked. ₹85,000 | SUCCESS | Trace ID: TRACE-DEMO-10001.",
+    "risk":"LOW"
+  },
+  {
+    "approvalId":"APR-DEMO-002",
+    "caseId":"OPS-DEMO-002",
+    "kind":"PROVIDER_ESCALATION",
+    "reference":"TX10002",
+    "sourceChannel":"CLIENT-DEMO",
+    "targetChannel":"PROVIDER-DEMO",
+    "context":"customer not received TX10002",
+    "facts":"42,000 | SUCCESS | TRACE-DEMO-10002",
+    "proposedText":"Please check transaction:\nReference: TX10002\nAmount: 42,000\nOur status: SUCCESS\nTrace ID: TRACE-DEMO-10002\nIssue: BENEFICIARY_NOT_RECEIVED",
+    "risk":"MEDIUM"
+  }
+]

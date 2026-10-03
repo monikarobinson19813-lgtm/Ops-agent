@@ -1,49 +1,71 @@
 # Ops Agent
 
-A generic, read-only operations workflow engine for support teams that need to:
+Ops Agent is a generic, read-only operations support engine for transaction-support teams.
 
-- classify incoming support messages;
-- look up transaction-like records through an external adapter;
-- decide whether a case can be answered locally or needs escalation;
-- correlate upstream/provider replies back to the correct open case;
-- draft a safe client-facing update;
-- keep a human approval step before anything is sent.
-
-## Public-repo boundary
-
-This repository intentionally contains **no production secrets or production data**.
-
-Do not commit:
-- credentials, authentication codes, cookies, session data or tokens;
-- real customer/merchant identifiers;
-- real chat exports;
-- production panel URLs or selectors;
-- live transaction data;
-- private group/channel identifiers.
-
-Use anonymized fixtures only.
-
-## Safety model
-
-The engine is designed for **read-only support workflows**.
-
-It does not initiate or retry payouts, modify beneficiaries, alter routing, approve financial actions, or change provider configuration.
-
-Suggested production flow:
+V0.2 focuses on converting repetitive support conversations into a safe, reviewable workflow:
 
 ```text
-Client message
-  -> intent parser
-  -> scope/policy checks
-  -> read-only lookup adapter
-  -> local reply OR provider escalation draft
-  -> human approval
+client message
+  -> intent classification
+  -> authorised read-only lookup
+  -> local answer OR upstream escalation draft
+  -> common-incident detection where appropriate
   -> provider reply correlation
   -> client update draft
+  -> operator triage / Command Center
   -> human approval
 ```
 
-## Run tests
+## V0.2 capabilities
+
+- transaction status / trace / failure / proof / CNR intent handling;
+- deterministic read-only escalation rules;
+- case lifecycle and provider reply correlation;
+- common queue/route incident detection;
+- duplicate provider escalation suppression;
+- incident recovery and health-backed closure rules;
+- provider/client follow-up SLAs;
+- P0-P3 operational triage;
+- Command Center with search and focus filters;
+- case and incident drill-down timelines;
+- shadow-mode operator actions and approvals;
+- local JSON audit/persistence;
+- anonymized end-to-end acceptance scenarios.
+
+## Command Center
+
+Start the local demo UI:
+
+```bash
+npm run review
+```
+
+Open:
+
+```text
+http://127.0.0.1:8787/
+```
+
+Useful local routes:
+
+- `/` — Command Center
+- `/review` — approval queue
+- `/detail?type=CASE&id=...` — case drill-down
+- `/detail?type=INCIDENT&id=...` — incident drill-down
+
+The local demo remains **shadow-only**. No external message is sent.
+
+## Scenario simulator
+
+Run the anonymized end-to-end acceptance scenarios:
+
+```bash
+npm run scenarios
+```
+
+Current scenarios cover local success, aged pending escalation, beneficiary non-receipt, common incident recovery, and unsafe/unmatched provider replies.
+
+## Tests
 
 Requires Node.js 20+.
 
@@ -51,6 +73,47 @@ Requires Node.js 20+.
 npm test
 ```
 
-## CI
+GitHub Actions runs the anonymized regression suite for pull requests and `main`.
 
-GitHub Actions runs the anonymized test suite on pushes and pull requests to `main`.
+## Safety model
+
+Ops Agent is designed for operational support, not financial execution.
+
+This public reference implementation must not:
+
+- initiate or retry payouts;
+- modify beneficiaries;
+- approve financial transactions;
+- alter bank/provider routing;
+- change provider configuration;
+- bypass authentication or OTP controls;
+- infer beneficiary receipt solely from a SUCCESS status;
+- send externally without the configured human-review policy.
+
+## Public repository boundary
+
+This repository contains only generic source code, documentation and anonymized fixtures.
+
+Never commit:
+
+- credentials, passwords, OTPs, cookies, sessions or tokens;
+- production panel URLs or live selectors;
+- real merchant/customer/provider identifiers;
+- real transaction/customer data;
+- WhatsApp exports, phone numbers or group IDs;
+- authenticated browser profiles;
+- production screenshots, proofs or downloaded documents;
+- private routing/account mappings.
+
+Production-specific integration belongs in a private/local deployment layer.
+
+## V0.2 freeze status
+
+The generic V0.2 engine is feature-frozen for this milestone.
+
+The acceptance criteria and remaining live-integration gates are documented in:
+
+- `docs/V0_2_ACCEPTANCE.md`
+- `docs/V0_2_RELEASE_NOTES.md`
+
+The next phase is private/live integration: read-only panel adapter, authenticated session handling, WhatsApp transport/shadow pilot, and controlled production validation.

@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "caseId": "OPS-DEMO-CNR",
+      "reference": "TX-DEMO-CNR",
+      "intent": "BENEFICIARY_NOT_RECEIVED",
+      "state": "WAITING_PROVIDER",
+      "createdAt": "2026-10-03T12:20:00.000Z",
+      "updatedAt": "2026-10-03T12:20:00.000Z",
+      "providerEscalatedAt": "2026-10-03T12:20:00.000Z",
+      "lookupSnapshot": {
+        "amount": 250000,
+        "status": "SUCCESS",
+        "traceId": "TRACE-DEMO-CNR"
+      }
+    },
+    {
+      "caseId": "OPS-DEMO-READY",
+      "reference": "TX-DEMO-READY",
+      "intent": "TRANSACTION_STATUS",
+      "state": "CLIENT_UPDATE_READY",
+      "createdAt": "2026-10-03T12:40:00.000Z",
+      "updatedAt": "2026-10-03T12:40:00.000Z",
+      "clientReply": {
+        "message": "Confirmed upstream update is ready for client review."
+      }
+    },
+    {
+      "caseId": "OPS-DEMO-LINKED-1",
+      "reference": "TX-DEMO-LINKED-1",
+      "intent": "TRANSACTION_STATUS",
+      "state": "WAITING_PROVIDER",
+      "linkedIncidentId": "INC-DEMO-1",
+      "createdAt": "2026-10-03T12:35:00.000Z",
+      "updatedAt": "2026-10-03T12:35:00.000Z",
+      "lookupSnapshot": {
+        "amount": 42000,
+        "status": "PENDING"
+      }
+    },
+    {
+      "caseId": "OPS-DEMO-EVIDENCE",
+      "reference": "TX-DEMO-EVIDENCE",
+      "intent": "BENEFICIARY_NOT_RECEIVED",
+      "state": "WAITING_CLIENT_EVIDENCE",
+      "createdAt": "2026-10-03T09:00:00.000Z",
+      "updatedAt": "2026-10-03T09:00:00.000Z",
+      "clientEvidenceRequestedAt": "2026-10-03T09:00:00.000Z"
+    }
+  ],
+  "incidents": [
+    {
+      "incidentId": "INC-DEMO-1",
+      "type": "QUEUE_DELAY",
+      "state": "OPEN",
+      "summary": "Common queue delay on demo route",
+      "affectedCaseIds": [
+        "OPS-DEMO-LINKED-1",
+        "OPS-DEMO-LINKED-2",
+        "OPS-DEMO-LINKED-3",
+        "OPS-DEMO-LINKED-4",
+        "OPS-DEMO-LINKED-5",
+        "OPS-DEMO-LINKED-6"
+      ],
+      "relatedReferences": [
+        "TX-DEMO-LINKED-1",
+        "TX-DEMO-LINKED-2",
+        "TX-DEMO-LINKED-3"
+      ],
+      "createdAt": "2026-10-03T12:30:00.000Z",
+      "updatedAt": "2026-10-03T12:35:00.000Z",
+      "escalationSentAt": "2026-10-03T12:35:00.000Z",
+      "providerUpdatedAt": null
+    }
+  ]
+}
