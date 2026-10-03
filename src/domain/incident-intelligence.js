@@ -225,12 +225,18 @@ export function buildIncidentClientUpdates(incident, cases = [], {
         ? 'Update: processing is recovering and affected transactions are moving.'
         : 'Update: we are tracking a common upstream processing issue affecting multiple transactions.';
 
-    const message = providerUpdate
-      ? `${base} Provider update: ${providerUpdate}`
+    const channelCount = rows.length;
+    const scopedBase = channelCount > 1
+      ? `${base} This is currently linked to ${channelCount} affected transactions in this client channel.`
       : base;
+
+    const message = providerUpdate
+      ? `${scopedBase} Provider update: ${providerUpdate}`
+      : scopedBase;
 
     return {
       clientChannelId,
+      affectedCount:channelCount,
       caseIds:rows.map(x => x.caseId),
       references:rows.map(x => x.reference).filter(Boolean),
       message,
