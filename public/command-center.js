@@ -9,6 +9,9 @@ function esc(v){
 function empty(label){
   return `<div class="empty">${esc(label)}</div>`;
 }
+function href(type,id){
+  return `/detail?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`;
+}
 
 function priorityCard(item){
   return `
@@ -16,7 +19,7 @@ function priorityCard(item){
       <div class="row">
         <div>
           <span class="band">${esc(item.priorityBand)} · ${esc(item.priorityScore)}</span>
-          <div class="title" style="margin-top:6px">${esc(item.entityId)}</div>
+          <div class="title" style="margin-top:6px"><a href="${href(item.entityType,item.entityId)}" style="color:inherit;text-decoration:none">${esc(item.entityId)}</a></div>
           <div class="muted">${esc(item.entityType)}${item.reference ? ' · ' + esc(item.reference) : ''}</div>
         </div>
         <div class="action">${esc(item.nextAction)}</div>
@@ -31,7 +34,7 @@ function incidentCard(item){
     <div class="item">
       <div class="row">
         <div>
-          <div class="title">${esc(item.incidentId)}</div>
+          <div class="title"><a href="${href('INCIDENT',item.incidentId)}" style="color:inherit;text-decoration:none">${esc(item.incidentId)}</a></div>
           <div class="muted">${esc(item.type)} · ${esc(item.state)}</div>
         </div>
         <span class="band">${esc(p.priorityBand || '')} ${esc(p.priorityScore || '')}</span>
@@ -47,7 +50,7 @@ function waitingCard(item){
     <div class="item">
       <div class="row">
         <div>
-          <div class="title">${esc(item.reference || item.caseId)}</div>
+          <div class="title"><a href="${href('CASE',item.caseId)}" style="color:inherit;text-decoration:none">${esc(item.reference || item.caseId)}</a></div>
           <div class="muted">${esc(item.intent)} · ${esc(item.state)}</div>
         </div>
         <span class="band">${esc(p.priorityBand || '')} ${esc(p.priorityScore || '')}</span>
@@ -60,7 +63,7 @@ function waitingCard(item){
 function updateCard(item){
   return `
     <div class="item">
-      <div class="title">${esc(item.reference || item.caseId)}</div>
+      <div class="title"><a href="${href('CASE',item.caseId)}" style="color:inherit;text-decoration:none">${esc(item.reference || item.caseId)}</a></div>
       <div class="muted">${esc(item.state)}</div>
       <div class="reasons">${esc(item.clientReply?.message || item.clientReply || 'Update ready for review.')}</div>
     </div>`;
@@ -69,7 +72,7 @@ function updateCard(item){
 function approvalCard(item){
   return `
     <div class="item">
-      <div class="title">${esc(item.kind)}</div>
+      <div class="title"><a href="${href('CASE',item.caseId)}" style="color:inherit;text-decoration:none">${esc(item.kind)}</a></div>
       <div class="muted">${esc(item.caseId)} · ${esc(item.approvalId)}</div>
       <div class="reasons">${esc(item.proposedText)}</div>
     </div>`;
