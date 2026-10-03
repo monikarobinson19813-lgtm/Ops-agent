@@ -5,14 +5,17 @@ import { fileURLToPath } from 'node:url';
 import { createApproval, applyApprovalAction } from './domain/approval.js';
 import { LocalJsonStore } from './storage/local-json-store.js';
 import { auditEvent, AUDIT_TYPES } from './domain/audit.js';
+import { buildCommandCenter } from './domain/command-center.js';
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(__dirname,'..');
 const fixturePath=path.join(root,'fixtures','review-cases.json');
+const commandCenterFixturePath=path.join(root,'fixtures','command-center-demo.json');
 const publicDir=path.join(root,'public');
 const store=new LocalJsonStore(path.join(root,'.data','review-state'));
 
 const fixtures=JSON.parse(fs.readFileSync(fixturePath,'utf8'));
+const commandCenterFixture=JSON.parse(fs.readFileSync(commandCenterFixturePath,'utf8'));
 
 if(store.listApprovals().length===0){
   store.saveApprovals(fixtures.map(row=>({
@@ -48,11 +51,34 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
 
   if(req.method==='GET' && url.pathname==='/'){
+    return serve(res,path.join(publicDir,'command-center.html'),'text/html; charset=utf-8');
+  }
+
+  if(req.method==='GET' && url.pathname==='/command-center.js'){
+    return serve(res,path.join(publicDir,'command-center.js'),'text/javascript; charset=utf-8');
+  }
+
+  if(req.method==='GET' && url.pathname==='/review'){
     return serve(res,path.join(publicDir,'review.html'),'text/html; charset=utf-8');
   }
 
   if(req.method==='GET' && url.pathname==='/app.js'){
     return serve(res,path.join(publicDir,'app.js'),'text/javascript; charset=utf-8');
+  }
+
+  if(req.method==='GET' && url.pathname==='/api/command-center'){
+    const approvals=store.listApprovals();
+    const model=buildCommandCenter({
+      cases:commandCenterFixture.cases || [],
+      incidents:commandCenterFixture.incidents || [],
+      approvals,
+      now:new Date()
+    });
+    return json(res,200,{
+      ...model,
+      sendMode:'SHADOW_ONLY',
+      dataMode:'DEMO'
+    });
   }
 
   if(req.method==='GET' && url.pathname==='/api/approvals'){
@@ -97,6 +123,7 @@ const server=http.createServer(async(req,res)=>{
 
 const port=Number(process.env.REVIEW_PORT || 8787);
 server.listen(port,'127.0.0.1',()=>{
-  console.log(`Shadow review: http://127.0.0.1:${port}`);
+  console.log(`Command Center: http://127.0.0.1:${port}/`);
+  console.log(`Shadow review: http://127.0.0.1:${port}/review`);
   console.log('No external message is sent.');
 });
