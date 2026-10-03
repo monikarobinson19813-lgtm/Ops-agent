@@ -220,7 +220,7 @@ export function simulateIncidentScenario(scenario) {
       [incident],
       {
         providerChannelId:scenario.providerChannelId,
-        quotedIncidentId:scenario.quotedIncidentId || incident.incidentId
+        quotedIncidentId:scenario.quotedIncidentId ?? incident.incidentId
       }
     );
 
