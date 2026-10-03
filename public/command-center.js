@@ -13,6 +13,81 @@ function href(type,id){
   return `/detail?type=${encodeURIComponent(type)}&id=${encodeURIComponent(id)}`;
 }
 
+let commandCenterData=null;
+let focusView='ALL';
+
+function matchesFocus(item){
+  const query=(document.querySelector('#focus-search')?.value || '').trim().toLowerCase();
+  const priority=document.querySelector('#focus-priority')?.value || 'ALL';
+
+  const haystack=[
+    item.entityId,
+    item.reference,
+    item.intent,
+    item.state,
+    item.summary,
+    item.priority?.priorityBand,
+    item.priority?.nextAction
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  if(query && !haystack.includes(query))return false;
+  if(priority!=='ALL' && item.priority?.priorityBand!==priority)return false;
+
+  if(focusView==='URGENT' && !['P0','P1'].includes(item.priority?.priorityBand))return false;
+  if(focusView==='CNR' && item.intent!=='BENEFICIARY_NOT_RECEIVED')return false;
+  if(focusView==='WAITING_PROVIDER' && !['WAITING_PROVIDER','NEEDS_PROVIDER'].includes(item.state))return false;
+  if(focusView==='CLIENT_UPDATES' && !['PROVIDER_REPLIED','CLIENT_UPDATE_READY'].includes(item.state))return false;
+  if(focusView==='INCIDENTS' && item.entityType!=='INCIDENT')return false;
+  if(focusView==='APPROVALS' && !item.hasPendingApproval)return false;
+
+  return true;
+}
+
+function renderFocus(){
+  const root=document.querySelector('#focus-results');
+  if(!root || !commandCenterData)return;
+
+  const rows=(commandCenterData.searchIndex || []).filter(matchesFocus);
+  const hasFilter=
+    focusView!=='ALL' ||
+    (document.querySelector('#focus-search')?.value || '').trim() ||
+    (document.querySelector('#focus-priority')?.value || 'ALL')!=='ALL';
+
+  if(!hasFilter){
+    root.innerHTML='<div class="muted">Use search or a focus button to narrow the operational queue.</div>';
+    return;
+  }
+
+  root.innerHTML=rows.length
+    ? rows.map(item=>`
+        <div class="item">
+          <div class="row">
+            <div>
+              <span class="band">${esc(item.priority?.priorityBand || '')} ${esc(item.priority?.priorityScore || '')}</span>
+              <div class="title" style="margin-top:6px"><a href="${href(item.entityType,item.entityId)}" style="color:inherit;text-decoration:none">${esc(item.reference || item.entityId)}</a></div>
+              <div class="muted">${esc(item.entityType)} · ${esc(item.intent || item.state || '')}</div>
+            </div>
+            <div class="action">${esc(item.priority?.nextAction || '')}</div>
+          </div>
+          <div class="reasons">${esc(item.summary || (item.priority?.reasons || []).join(' · '))}</div>
+        </div>
+      `).join('')
+    : empty('No matching open work.');
+}
+
+function bindFocus(){
+  document.querySelector('#focus-search')?.addEventListener('input',renderFocus);
+  document.querySelector('#focus-priority')?.addEventListener('change',renderFocus);
+  document.querySelectorAll('[data-view]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      focusView=btn.dataset.view || 'ALL';
+      document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      renderFocus();
+    });
+  });
+}
+
 function priorityCard(item){
   return `
     <div class="item">
@@ -81,6 +156,7 @@ function approvalCard(item){
 async function load(){
   const res=await fetch('/api/command-center');
   const data=await res.json();
+  commandCenterData=data;
 
   document.querySelector('#health').innerHTML=
     `<span class="pill">${esc(data.health)}</span><strong>Operational view</strong><span class="muted">${esc(data.generatedAt)}</span>`;
@@ -120,6 +196,9 @@ async function load(){
 
   document.querySelector('#pending-approvals').innerHTML=
     approvals.length ? approvals.map(approvalCard).join('') : empty('No pending approvals.');
+
+  bindFocus();
+  renderFocus();
 }
 
 load();
