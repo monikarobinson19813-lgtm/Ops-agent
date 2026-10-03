@@ -1,0 +1,13 @@
+{
+  "name": "ops-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Generic read-only operations support workflow engine.",
+  "scripts": {
+    "test": "node test/intent.test.js && node test/workflow.test.js && node test/approval.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
