@@ -5,7 +5,9 @@ import {
   attachCaseToIncident,
   shouldSendIncidentEscalation,
   markIncidentEscalated,
-  applyProviderIncidentUpdate
+  applyProviderIncidentUpdate,
+  shouldPrepareIncidentClientUpdate,
+  markIncidentClientUpdatePrepared
 } from '../src/domain/incident-coordinator.js';
 import { INCIDENT_STATES } from '../src/domain/incident.js';
 
@@ -104,6 +106,34 @@ const c4=pendingCase('OPS-4','TX4','2026-10-03T12:05:00.000Z');
   assert.equal(incident.state,'RECOVERING');
   assert.match(incident.providerUpdate,/recovering/i);
   assert.equal(shouldSendIncidentEscalation(incident),false);
+
+  assert.equal(
+    shouldPrepareIncidentClientUpdate(incident,{
+      now:new Date('2026-10-03T12:08:30.000Z'),
+      minIntervalMinutes:5
+    }),
+    true
+  );
+
+  incident=markIncidentClientUpdatePrepared(incident,{
+    at:'2026-10-03T12:08:30.000Z'
+  });
+
+  assert.equal(
+    shouldPrepareIncidentClientUpdate(incident,{
+      now:new Date('2026-10-03T12:10:00.000Z'),
+      minIntervalMinutes:5
+    }),
+    false
+  );
+
+  assert.equal(
+    shouldPrepareIncidentClientUpdate(incident,{
+      now:new Date('2026-10-03T12:14:00.000Z'),
+      minIntervalMinutes:5
+    }),
+    true
+  );
 }
 
 console.log('incident coordinator tests passed');
