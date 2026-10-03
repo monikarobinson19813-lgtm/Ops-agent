@@ -1,0 +1,155 @@
+[
+  {
+    "id":"S1_LOCAL_SUCCESS",
+    "title":"Local success status can be answered without provider",
+    "kind":"SINGLE_CASE",
+    "now":"2026-10-03T12:15:00.000Z",
+    "caseId":"OPS-S1",
+    "clientMessage":"status TX10001",
+    "record":{
+      "reference":"TX10001",
+      "amount":85000,
+      "status":"SUCCESS",
+      "traceId":"TRACE-DEMO-10001",
+      "createdAt":"2026-10-03T12:00:00.000Z"
+    },
+    "expect":[
+      {"path":"parsed.intent","equals":"TRANSACTION_STATUS"},
+      {"path":"decision.action","equals":"REPLY_LOCAL"},
+      {"path":"caseRecord.state","equals":"RESOLVED_LOCALLY"},
+      {"path":"initialReply.message","includes":"SUCCESS"}
+    ]
+  },
+  {
+    "id":"S2_AGED_PENDING",
+    "title":"Aged pending payout escalates upstream",
+    "kind":"SINGLE_CASE",
+    "now":"2026-10-03T12:20:00.000Z",
+    "caseId":"OPS-S2",
+    "clientMessage":"please check TX20002 pending",
+    "record":{
+      "reference":"TX20002",
+      "amount":42000,
+      "status":"PENDING",
+      "traceId":null,
+      "createdAt":"2026-10-03T12:00:00.000Z"
+    },
+    "expect":[
+      {"path":"decision.action","equals":"ESCALATE_PROVIDER"},
+      {"path":"caseRecord.state","equals":"NEEDS_PROVIDER"},
+      {"path":"approvals.length","min":1}
+    ]
+  },
+  {
+    "id":"S3_CNR_PROVIDER_TRACE",
+    "title":"Success but beneficiary non-receipt stays under trace review",
+    "kind":"SINGLE_CASE",
+    "now":"2026-10-03T12:20:00.000Z",
+    "caseId":"OPS-S3",
+    "clientMessage":"customer not received TX30003",
+    "record":{
+      "reference":"TX30003",
+      "amount":125000,
+      "status":"SUCCESS",
+      "traceId":"TRACE-DEMO-30003",
+      "createdAt":"2026-10-03T12:00:00.000Z"
+    },
+    "providerReply":"Bank side also shows success. UTR: TRACE-DEMO-30003",
+    "expect":[
+      {"path":"parsed.intent","equals":"BENEFICIARY_NOT_RECEIVED"},
+      {"path":"decision.action","equals":"ESCALATE_PROVIDER"},
+      {"path":"providerReply.type","equals":"SUCCESS_CONFIRMATION"},
+      {"path":"caseRecord.state","equals":"CLIENT_UPDATE_READY"},
+      {"path":"providerClientUpdate.reviewRequired","equals":true}
+    ]
+  },
+  {
+    "id":"S4_COMMON_QUEUE_RECOVERY",
+    "title":"Three matching pending complaints become one recovering incident",
+    "kind":"INCIDENT_CLUSTER",
+    "now":"2026-10-03T12:10:00.000Z",
+    "providerChannelId":"PROVIDER-DEMO",
+    "accountId":"ACCOUNT-DEMO",
+    "incidentId":"INC-S4",
+    "incidentSummary":"Common queue delay on demo route",
+    "cases":[
+      {
+        "caseId":"OPS-S4-1",
+        "clientMessage":"status TX41001",
+        "createdAt":"2026-10-03T12:01:00.000Z",
+        "clientChannelId":"CLIENT-A",
+        "record":{"reference":"TX41001","amount":10000,"status":"PENDING","routeKey":"ROUTE-DEMO","createdAt":"2026-10-03T12:01:00.000Z"}
+      },
+      {
+        "caseId":"OPS-S4-2",
+        "clientMessage":"status TX41002",
+        "createdAt":"2026-10-03T12:03:00.000Z",
+        "clientChannelId":"CLIENT-A",
+        "record":{"reference":"TX41002","amount":11000,"status":"PENDING","routeKey":"ROUTE-DEMO","createdAt":"2026-10-03T12:03:00.000Z"}
+      },
+      {
+        "caseId":"OPS-S4-3",
+        "clientMessage":"status TX41003",
+        "createdAt":"2026-10-03T12:05:00.000Z",
+        "clientChannelId":"CLIENT-B",
+        "record":{"reference":"TX41003","amount":12000,"status":"PENDING","routeKey":"ROUTE-DEMO","createdAt":"2026-10-03T12:05:00.000Z"}
+      }
+    ],
+    "providerIncidentReply":"INC-S4 queue is reducing and processing is recovering",
+    "healthMetrics":{
+      "pendingCount":5,
+      "oldestPendingMinutes":3,
+      "recentSuccessCount":20,
+      "newComplaintCount":0
+    },
+    "expect":[
+      {"path":"lastPlan.action","equals":"CREATE_COMMON_INCIDENT"},
+      {"path":"incident.state","equals":"RECOVERING"},
+      {"path":"incident.affectedCaseIds.length","equals":3},
+      {"path":"clientUpdates.length","equals":2},
+      {"path":"approvals.length","min":3}
+    ]
+  },
+  {
+    "id":"S5_AMBIGUOUS_PROVIDER_REPLY",
+    "title":"Uncorrelated provider wording does not invent an incident match",
+    "kind":"INCIDENT_CLUSTER",
+    "now":"2026-10-03T12:10:00.000Z",
+    "providerChannelId":"PROVIDER-DEMO",
+    "accountId":"ACCOUNT-DEMO",
+    "incidentId":"INC-S5",
+    "cases":[
+      {
+        "caseId":"OPS-S5-1",
+        "clientMessage":"status TX51001",
+        "createdAt":"2026-10-03T12:01:00.000Z",
+        "record":{"reference":"TX51001","status":"PENDING","routeKey":"ROUTE-S5","createdAt":"2026-10-03T12:01:00.000Z"}
+      },
+      {
+        "caseId":"OPS-S5-2",
+        "clientMessage":"status TX51002",
+        "createdAt":"2026-10-03T12:02:00.000Z",
+        "record":{"reference":"TX51002","status":"PENDING","routeKey":"ROUTE-S5","createdAt":"2026-10-03T12:02:00.000Z"}
+      },
+      {
+        "caseId":"OPS-S5-3",
+        "clientMessage":"status TX51003",
+        "createdAt":"2026-10-03T12:03:00.000Z",
+        "record":{"reference":"TX51003","status":"PENDING","routeKey":"ROUTE-S5","createdAt":"2026-10-03T12:03:00.000Z"}
+      }
+    ],
+    "providerIncidentReply":"checking, will update",
+    "quotedIncidentId":"",
+    "healthMetrics":{
+      "pendingCount":25,
+      "oldestPendingMinutes":15,
+      "recentSuccessCount":0,
+      "newComplaintCount":3
+    },
+    "expect":[
+      {"path":"providerInterpretation.correlation.status","equals":"NO_MATCH"},
+      {"path":"providerInterpretation.reviewRequired","equals":true},
+      {"path":"incident.state","equals":"MITIGATING"}
+    ]
+  }
+]
