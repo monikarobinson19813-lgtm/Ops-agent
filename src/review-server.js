@@ -6,6 +6,7 @@ import { createApproval, applyApprovalAction } from './domain/approval.js';
 import { LocalJsonStore } from './storage/local-json-store.js';
 import { auditEvent, AUDIT_TYPES } from './domain/audit.js';
 import { buildCommandCenter } from './domain/command-center.js';
+import { buildEntityDetail } from './domain/detail.js';
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(__dirname,'..');
@@ -62,6 +63,14 @@ const server=http.createServer(async(req,res)=>{
     return serve(res,path.join(publicDir,'review.html'),'text/html; charset=utf-8');
   }
 
+  if(req.method==='GET' && url.pathname==='/detail'){
+    return serve(res,path.join(publicDir,'detail.html'),'text/html; charset=utf-8');
+  }
+
+  if(req.method==='GET' && url.pathname==='/detail.js'){
+    return serve(res,path.join(publicDir,'detail.js'),'text/javascript; charset=utf-8');
+  }
+
   if(req.method==='GET' && url.pathname==='/app.js'){
     return serve(res,path.join(publicDir,'app.js'),'text/javascript; charset=utf-8');
   }
@@ -76,6 +85,34 @@ const server=http.createServer(async(req,res)=>{
     });
     return json(res,200,{
       ...model,
+      sendMode:'SHADOW_ONLY',
+      dataMode:'DEMO'
+    });
+  }
+
+  if(req.method==='GET' && url.pathname==='/api/detail'){
+    const type=String(url.searchParams.get('type') || '').toUpperCase();
+    const id=String(url.searchParams.get('id') || '');
+    const approvals=store.listApprovals();
+    const audit=[
+      ...(commandCenterFixture.audit || []),
+      ...store.listAudit()
+    ];
+
+    const detail=buildEntityDetail({
+      type,
+      id,
+      cases:commandCenterFixture.cases || [],
+      incidents:commandCenterFixture.incidents || [],
+      approvals,
+      audit,
+      now:new Date()
+    });
+
+    if(!detail)return json(res,404,{error:'Detail not found'});
+
+    return json(res,200,{
+      ...detail,
       sendMode:'SHADOW_ONLY',
       dataMode:'DEMO'
     });
