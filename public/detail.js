@@ -11,6 +11,58 @@ function kv(obj){
     `<div class="kv"><strong>${esc(k)}</strong><div>${esc(Array.isArray(v)?v.join(', '):(typeof v==='object'&&v!==null?JSON.stringify(v):v))}</div></div>`
   ).join('');
 }
+function actionButtons(d){
+  const buttons=[];
+  const p=d.priority || {};
+
+  if(d.entityType==='CASE'){
+    if(['WAITING_PROVIDER','NEEDS_PROVIDER'].includes(d.summary?.state)){
+      buttons.push(['DRAFT_PROVIDER_FOLLOWUP','Draft provider follow-up']);
+    }
+    if(['PROVIDER_REPLIED','CLIENT_UPDATE_READY'].includes(d.summary?.state) && d.approvals?.length>=0){
+      buttons.push(['DRAFT_CLIENT_UPDATE','Prepare client update']);
+    }
+    if(d.summary?.state==='WAITING_CLIENT_EVIDENCE'){
+      buttons.push(['DRAFT_CLIENT_EVIDENCE_REQUEST','Request client evidence']);
+    }
+  }
+
+  if(d.entityType==='INCIDENT' && !['RESOLVED','CLOSED'].includes(d.summary?.state)){
+    buttons.push(['DRAFT_PROVIDER_FOLLOWUP','Draft provider incident follow-up']);
+  }
+
+  return `
+    <div class="actions">
+      ${buttons.map(([action,label])=>`<button class="primary" onclick="operatorAction('${esc(d.entityType)}','${esc(d.entityId)}','${esc(action)}')">${esc(label)}</button>`).join('')}
+      <a class="action-link secondary" href="/review">Open approvals</a>
+    </div>
+    <div id="action-status" class="action-status"></div>
+  `;
+}
+
+async function operatorAction(type,id,action){
+  const node=document.querySelector('#action-status');
+  if(node)node.textContent='Creating shadow draft...';
+
+  const res=await fetch('/api/operator-action',{
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({type,id,action})
+  });
+  const data=await res.json();
+
+  if(!res.ok || !data.ok){
+    if(node)node.textContent='Error: '+(data.error || 'Unable to create draft');
+    return;
+  }
+
+  if(node){
+    node.innerHTML=data.created
+      ? 'Draft created. <a href="/review">Open approvals</a>'
+      : 'An equivalent pending draft already exists. <a href="/review">Open approvals</a>';
+  }
+}
+
 async function load(){
   const params=new URLSearchParams(location.search);
   const type=params.get('type');
@@ -43,6 +95,7 @@ async function load(){
       <div class="muted">${esc(d.subtitle)}</div>
       <div style="margin-top:9px;font-size:12px"><strong>Next:</strong> ${esc(p.nextAction||'REVIEW')}</div>
       <div class="muted" style="margin-top:5px">${(p.reasons||[]).map(esc).join(' · ')}</div>
+      ${actionButtons(d)}
     </section>
     <div class="grid">
       <section class="panel"><h2>Summary</h2>${kv(d.summary)}</section>
