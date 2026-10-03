@@ -1,6 +1,7 @@
 import { buildFollowupQueue } from './followup.js';
 import { buildTriageQueue } from './triage.js';
 import { buildDashboard } from './dashboard.js';
+import { buildCommandCenterIndex } from './command-center-focus.js';
 
 function followupMap(rows = []) {
   const map = new Map();
@@ -95,6 +96,13 @@ export function buildCommandCenter({
 
   const topPriorities = triage.slice(0, Math.max(1, topLimit));
 
+  const searchIndex = buildCommandCenterIndex({
+    cases,
+    incidents,
+    approvals,
+    triage
+  });
+
   const health =
     topPriorities.some(x => x.priorityBand === 'P0') ? 'CRITICAL' :
     topPriorities.some(x => x.priorityBand === 'P1') ? 'ATTENTION' :
@@ -115,6 +123,7 @@ export function buildCommandCenter({
       waitingProvider,
       clientUpdatesReady,
       pendingApprovals
-    }
+    },
+    searchIndex
   };
 }
