@@ -1,0 +1,23 @@
+{
+  "clientChannels": [
+    {
+      "channelKey": "CLIENT_DEMO",
+      "accountKeys": ["ACCOUNT_DEMO"],
+      "providerChannelKey": "PROVIDER_DEMO",
+      "enabled": true
+    }
+  ],
+  "providerChannels": [
+    {
+      "channelKey": "PROVIDER_DEMO",
+      "providerKey": "PROVIDER_GENERIC",
+      "enabled": true
+    }
+  ],
+  "accounts": [
+    {
+      "accountKey": "ACCOUNT_DEMO",
+      "externalAliases": ["ALIAS_DEMO_1"]
+    }
+  ]
+}
