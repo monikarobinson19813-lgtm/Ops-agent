@@ -43,8 +43,7 @@ export function buildDashboard({
       incidentsAwaitingProviderUpdate:incidentRows.filter(i => i.awaitingProviderUpdate).length,
       recoveringIncidents:incidentRows.filter(i => i.state === 'RECOVERING').length,
       pendingApprovals:pendingApprovals.length,
-      followups,
-    triageDue:followups.filter(x => x.due !== false).length,
+      followupsDue:followups.filter(x => x.due !== false).length,
       providerFollowupsDue:followups.filter(x => ['PROVIDER_CASE_FOLLOWUP','PROVIDER_INCIDENT_FOLLOWUP'].includes(x.type)).length,
       clientEvidenceRemindersDue:followups.filter(x => x.type === 'CLIENT_EVIDENCE_REMINDER').length,
       clientUpdatesDue:followups.filter(x => x.type === 'CLIENT_UPDATE_DUE').length,
@@ -61,6 +60,7 @@ export function buildDashboard({
       updatedMinutesAgo:ageMinutes(c.updatedAt, now)
     })),
     activeIncidents:incidentRows,
-    followups
+    followups,
+    triage
   };
 }
