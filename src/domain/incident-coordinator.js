@@ -138,3 +138,50 @@ export function applyProviderIncidentUpdate(incident, {
     updatedAt:at
   };
 }
+
+
+export function shouldPrepareIncidentClientUpdate(incident, {
+  now = new Date(),
+  minIntervalMinutes = 5,
+  force = false
+} = {}) {
+  if (!incident) return false;
+  if (force) return true;
+
+  if (!incident.lastClientUpdatePreparedAt) return true;
+
+  const last = new Date(incident.lastClientUpdatePreparedAt);
+  if (Number.isNaN(last.getTime())) return true;
+
+  const providerUpdated = incident.providerUpdatedAt
+    ? new Date(incident.providerUpdatedAt)
+    : null;
+
+  if (
+    providerUpdated &&
+    !Number.isNaN(providerUpdated.getTime()) &&
+    providerUpdated.getTime() > last.getTime()
+  ) return true;
+
+  if (
+    incident.lastClientUpdateState &&
+    incident.lastClientUpdateState !== incident.state
+  ) return true;
+
+  const elapsedMinutes = Math.max(0, (now.getTime() - last.getTime()) / 60000);
+  return elapsedMinutes >= minIntervalMinutes;
+}
+
+export function markIncidentClientUpdatePrepared(incident, {
+  at = new Date().toISOString()
+} = {}) {
+  if (!incident) throw new Error('Incident is required');
+
+  return {
+    ...incident,
+    lastClientUpdatePreparedAt:at,
+    lastClientUpdateState:incident.state,
+    lastClientProviderUpdateSeenAt:incident.providerUpdatedAt || null,
+    updatedAt:at
+  };
+}
