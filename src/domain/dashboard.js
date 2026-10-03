@@ -10,6 +10,7 @@ export function buildDashboard({
   incidents = [],
   approvals = [],
   followups = [],
+  triage = [],
   now = new Date()
 }) {
   const openCases = cases.filter(c => !['CLOSED','CLIENT_UPDATED'].includes(c.state));
@@ -42,10 +43,13 @@ export function buildDashboard({
       incidentsAwaitingProviderUpdate:incidentRows.filter(i => i.awaitingProviderUpdate).length,
       recoveringIncidents:incidentRows.filter(i => i.state === 'RECOVERING').length,
       pendingApprovals:pendingApprovals.length,
-      followupsDue:followups.filter(x => x.due !== false).length,
+      followups,
+    triageDue:followups.filter(x => x.due !== false).length,
       providerFollowupsDue:followups.filter(x => ['PROVIDER_CASE_FOLLOWUP','PROVIDER_INCIDENT_FOLLOWUP'].includes(x.type)).length,
       clientEvidenceRemindersDue:followups.filter(x => x.type === 'CLIENT_EVIDENCE_REMINDER').length,
-      clientUpdatesDue:followups.filter(x => x.type === 'CLIENT_UPDATE_DUE').length
+      clientUpdatesDue:followups.filter(x => x.type === 'CLIENT_UPDATE_DUE').length,
+      p0Items:triage.filter(x => x.priorityBand === 'P0').length,
+      p1Items:triage.filter(x => x.priorityBand === 'P1').length
     },
     openCases:openCases.map(c => ({
       caseId:c.caseId,
