@@ -7,6 +7,10 @@ import { LocalJsonStore } from './storage/local-json-store.js';
 import { auditEvent, AUDIT_TYPES } from './domain/audit.js';
 import { buildCommandCenter } from './domain/command-center.js';
 import { buildEntityDetail } from './domain/detail.js';
+import {
+  planOperatorAction,
+  findEquivalentPendingApproval
+} from './domain/operator-action.js';
 
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(__dirname,'..');
@@ -116,6 +120,76 @@ const server=http.createServer(async(req,res)=>{
       sendMode:'SHADOW_ONLY',
       dataMode:'DEMO'
     });
+  }
+
+  if(req.method==='POST' && url.pathname==='/api/operator-action'){
+    try{
+      const input=await body(req);
+      const type=String(input.type || '').toUpperCase();
+      const id=String(input.id || '');
+      const action=String(input.action || '');
+
+      const plan=planOperatorAction({
+        action,
+        type,
+        id,
+        cases:commandCenterFixture.cases || [],
+        incidents:commandCenterFixture.incidents || [],
+        now:new Date()
+      });
+
+      const approvals=store.listApprovals();
+      const existing=findEquivalentPendingApproval(approvals,plan);
+
+      if(existing){
+        return json(res,200,{
+          ok:true,
+          created:false,
+          approval:existing,
+          approvalUrl:'/review',
+          sendMode:'SHADOW_ONLY'
+        });
+      }
+
+      const approval=createApproval({
+        approvalId:`APR-LOCAL-${Date.now()}-${approvals.length + 1}`,
+        caseId:plan.caseId,
+        kind:plan.kind,
+        proposedText:plan.proposedText,
+        metadata:{
+          actionKey:plan.actionKey,
+          entityType:plan.entityType,
+          entityId:plan.entityId,
+          incidentId:plan.incidentId || null,
+          source:'DETAIL_ACTION'
+        }
+      });
+
+      approvals.push(approval);
+      store.saveApprovals(approvals);
+
+      store.appendAudit(auditEvent({
+        type:plan.auditType,
+        caseId:plan.caseId,
+        incidentId:plan.incidentId,
+        actor:'LOCAL_REVIEWER',
+        details:{
+          approvalId:approval.approvalId,
+          actionKey:plan.actionKey,
+          kind:plan.kind
+        }
+      }));
+
+      return json(res,201,{
+        ok:true,
+        created:true,
+        approval,
+        approvalUrl:'/review',
+        sendMode:'SHADOW_ONLY'
+      });
+    }catch(error){
+      return json(res,400,{ok:false,error:error.message});
+    }
   }
 
   if(req.method==='GET' && url.pathname==='/api/approvals'){
