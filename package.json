@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Generic read-only operations support workflow engine.",
   "scripts": {
-    "test": "node test/intent.test.js && node test/workflow.test.js && node test/approval.test.js && node test/incident.test.js && node test/reply-risk.test.js && node test/metrics.test.js && node test/routing-audit.test.js && node test/storage.test.js",
+    "test": "node test/intent.test.js && node test/workflow.test.js && node test/approval.test.js && node test/incident.test.js && node test/reply-risk.test.js && node test/metrics.test.js && node test/routing-audit.test.js && node test/storage.test.js && node test/runtime-policy.test.js",
     "demo": "node src/demo.js",
     "review": "node src/review-server.js"
   },
